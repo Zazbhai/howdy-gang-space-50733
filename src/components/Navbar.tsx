@@ -4,6 +4,7 @@ import { Search, LogOut, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { ThemeToggle } from './ThemeToggle';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -35,20 +36,24 @@ const Navbar = () => {
             <span className="text-xl font-heading font-bold">Lost & Found</span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             {user ? (
               <>
-                <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+                <Button variant="ghost" onClick={() => navigate('/dashboard')} className="hidden md:flex">
                   <User className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/search')}>
+                <Button variant="ghost" onClick={() => navigate('/search')} className="hidden md:flex">
                   <Search className="h-4 w-4 mr-2" />
                   Search
                 </Button>
-                <Button variant="ghost" onClick={handleLogout}>
+                <Button variant="ghost" onClick={handleLogout} className="hidden md:flex">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="md:hidden">
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </>
             ) : (

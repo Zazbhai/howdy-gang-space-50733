@@ -48,6 +48,9 @@ const Search = () => {
     item.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const lostItems = filteredItems?.filter((item) => item.type === 'lost');
+  const foundItems = filteredItems?.filter((item) => item.type === 'found');
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -116,46 +119,104 @@ const Search = () => {
             <p className="text-muted-foreground">Loading items...</p>
           </div>
         ) : filteredItems && filteredItems.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                {item.image_url && (
-                  <div className="aspect-video w-full overflow-hidden bg-muted">
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <Badge variant={item.type === 'lost' ? 'destructive' : 'default'}>
-                      {item.type}
-                    </Badge>
-                  </div>
-                  <CardDescription className="line-clamp-2">
-                    {item.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{item.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(item.date), 'MMM d, yyyy')}</span>
-                    </div>
-                    <Badge variant="outline" className="mt-2">
-                      {item.category}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-12">
+            {/* Lost Items Section */}
+            {lostItems && lostItems.length > 0 && (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-2">Lost Items</h2>
+                  <p className="text-muted-foreground">Items people are looking for</p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {lostItems.map((item) => (
+                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {item.image_url && (
+                        <div className="aspect-video w-full overflow-hidden bg-muted">
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                          <Badge variant="destructive">Lost</Badge>
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="h-4 w-4" />
+                            <span>{item.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <span>{format(new Date(item.date), 'MMM d, yyyy')}</span>
+                          </div>
+                          <Badge variant="outline" className="mt-2">
+                            {item.category}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Found Items Section */}
+            {foundItems && foundItems.length > 0 && (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-heading font-bold text-foreground mb-2">Found Items</h2>
+                  <p className="text-muted-foreground">Items waiting to be claimed</p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {foundItems.map((item) => (
+                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {item.image_url && (
+                        <div className="aspect-video w-full overflow-hidden bg-muted">
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                          <Badge variant="default">Found</Badge>
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="h-4 w-4" />
+                            <span>{item.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <span>{format(new Date(item.date), 'MMM d, yyyy')}</span>
+                          </div>
+                          <Badge variant="outline" className="mt-2">
+                            {item.category}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <Card>

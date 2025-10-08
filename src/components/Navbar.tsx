@@ -40,20 +40,17 @@ const Navbar = () => {
             <ThemeToggle />
             {user ? (
               <>
-                <Button variant="ghost" onClick={() => navigate('/dashboard')} className="hidden md:flex">
-                  <User className="h-4 w-4 mr-2" />
-                  Dashboard
+                <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
+                  <User className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Dashboard</span>
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/search')} className="hidden md:flex">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
+                <Button variant="ghost" onClick={() => navigate('/search')} size="sm">
+                  <Search className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Search</span>
                 </Button>
-                <Button variant="ghost" onClick={handleLogout} className="hidden md:flex">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="md:hidden">
-                  <LogOut className="h-4 w-4" />
+                <Button variant="ghost" onClick={handleLogout} size="sm">
+                  <LogOut className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Logout</span>
                 </Button>
               </>
             ) : (

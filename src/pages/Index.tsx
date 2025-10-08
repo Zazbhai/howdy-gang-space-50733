@@ -12,7 +12,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24">
+      <section className="container mx-auto px-4 py-16 md:py-24 pt-20">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6 bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent">
             Lost & Found

@@ -65,6 +65,7 @@ export type Database = {
           image_url: string | null
           location: string
           name: string
+          phone_number: string | null
           status: string
           type: Database["public"]["Enums"]["item_type"]
           updated_at: string
@@ -79,6 +80,7 @@ export type Database = {
           image_url?: string | null
           location: string
           name: string
+          phone_number?: string | null
           status?: string
           type: Database["public"]["Enums"]["item_type"]
           updated_at?: string
@@ -93,6 +95,7 @@ export type Database = {
           image_url?: string | null
           location?: string
           name?: string
+          phone_number?: string | null
           status?: string
           type?: Database["public"]["Enums"]["item_type"]
           updated_at?: string

@@ -30,7 +30,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/search');
     }
   }, [user, navigate]);
 
@@ -57,13 +57,13 @@ const Auth = () => {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/dashboard');
+        navigate('/search');
       } else {
         const { error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
+            emailRedirectTo: `${window.location.origin}/search`,
             data: {
               name: formData.name,
             },
@@ -76,7 +76,7 @@ const Auth = () => {
           title: 'Account created!',
           description: 'Welcome to Lost & Found.',
         });
-        navigate('/dashboard');
+        navigate('/search');
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

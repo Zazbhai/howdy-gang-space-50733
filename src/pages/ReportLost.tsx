@@ -22,6 +22,7 @@ const itemSchema = z.object({
   location: z.string().min(2, 'Location is required').max(200),
   category: z.enum(['wallet', 'bag', 'phone', 'keys', 'id', 'jewelry', 'electronics', 'clothing', 'documents', 'other']),
   date: z.string().min(1, 'Date is required'),
+  phoneNumber: z.string().regex(/^[\d\s\-\+\(\)]{10,}$/, 'Phone number must be at least 10 digits').max(20),
 });
 
 const ReportLost = () => {
@@ -36,6 +37,7 @@ const ReportLost = () => {
     location: '',
     category: '',
     date: '',
+    phoneNumber: '',
   });
 
   useEffect(() => {
@@ -101,6 +103,7 @@ const ReportLost = () => {
         category: formData.category as any,
         date: formData.date,
         image_url: imageUrl,
+        phone_number: formData.phoneNumber,
       });
 
       if (error) throw error;
@@ -145,7 +148,7 @@ const ReportLost = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle className="text-2xl font-heading">Report Lost Item</CardTitle>
@@ -216,6 +219,18 @@ const ReportLost = () => {
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   max={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Contact Phone Number *</Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="e.g., +1 234 567 8900"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                   required
                 />
               </div>

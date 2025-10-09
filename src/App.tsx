@@ -11,6 +11,7 @@ import ReportLost from "./pages/ReportLost";
 import ReportFound from "./pages/ReportFound";
 import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileBottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

@@ -146,7 +146,7 @@ const ReportFound = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />
       <div className="container mx-auto px-4 py-8 pt-20">
         <Card className="max-w-2xl mx-auto">

@@ -4,10 +4,22 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Package, MapPin, Calendar } from 'lucide-react';
+import { Plus, Search, Package, MapPin, Calendar, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +27,7 @@ const Dashboard = () => {
   const [recentItems, setRecentItems] = useState<any[]>([]);
   const [recentClaims, setRecentClaims] = useState<any[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -68,6 +81,28 @@ const Dashboard = () => {
     
     fetchRecentActivity();
   }, [user]);
+
+  const handleDeleteItem = async (itemId: string) => {
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', itemId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete item. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRecentItems(prev => prev.filter(item => item.id !== itemId));
+    toast({
+      title: "Success",
+      description: "Item deleted successfully.",
+    });
+  };
 
   if (loading) {
     return (
@@ -178,6 +213,27 @@ const Dashboard = () => {
                               </span>
                             </div>
                           </div>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Item</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{item.name}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       ))}
                     </div>

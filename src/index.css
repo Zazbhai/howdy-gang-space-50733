@@ -8,86 +8,109 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Primary brand color - Blue (#2E86DE) */
-    --primary: 209 77% 52%;
+    /* Nike-inspired modern theme - Light Mode */
+    /* Primary - Bold Orange accent */
+    --primary: 14 100% 57%;
     --primary-foreground: 0 0% 100%;
     
-    /* Light grey background (#F5F6FA) */
-    --background: 220 16% 97%;
-    --foreground: 210 17% 18%;
+    /* Clean white background */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
     
-    /* Card and surface colors */
+    /* Card and surface colors - Pure white */
     --card: 0 0% 100%;
-    --card-foreground: 210 17% 18%;
+    --card-foreground: 0 0% 9%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 210 17% 18%;
+    --popover-foreground: 0 0% 9%;
     
-    /* Secondary colors */
-    --secondary: 220 16% 97%;
-    --secondary-foreground: 210 17% 18%;
+    /* Secondary - Light grey */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
     
-    /* Accent and muted */
-    --accent: 209 77% 96%;
-    --accent-foreground: 209 77% 52%;
+    /* Accent - Subtle grey */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
     
-    --muted: 220 16% 97%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
     
-    /* Success for "Found" status */
-    --success: 142 76% 36%;
+    /* Success - Modern green */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     
-    /* Warning for "Pending" status */
+    /* Warning - Modern yellow */
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 9%;
     
-    /* Destructive */
+    /* Destructive - Modern red */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Borders and inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 209 77% 52%;
+    /* Borders and inputs - Subtle */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 14 100% 57%;
     
-    --radius: 0.75rem;
+    --radius: 0.5rem;
+    
+    /* Modern shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
   }
 
   .dark {
-    --primary: 209 77% 52%;
+    /* Nike-inspired modern theme - Dark Mode */
+    /* Primary - Bold Orange accent */
+    --primary: 14 100% 57%;
     --primary-foreground: 0 0% 100%;
     
-    --background: 210 17% 11%;
+    /* Deep black background */
+    --background: 0 0% 7%;
     --foreground: 0 0% 98%;
     
-    --card: 210 17% 15%;
+    /* Card - Slightly lighter black */
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 98%;
     
-    --popover: 210 17% 15%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
     
-    --secondary: 210 17% 20%;
+    /* Secondary - Dark grey */
+    --secondary: 0 0% 14%;
     --secondary-foreground: 0 0% 98%;
     
-    --accent: 209 77% 25%;
+    /* Accent - Medium grey */
+    --accent: 0 0% 14%;
     --accent-foreground: 0 0% 98%;
     
-    --muted: 210 17% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 63%;
     
-    --success: 142 76% 36%;
+    /* Success - Bright green */
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     
+    /* Warning - Bright yellow */
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 0 0% 9%;
     
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
+    /* Destructive - Modern red */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 210 17% 20%;
-    --input: 210 17% 20%;
-    --ring: 209 77% 52%;
+    /* Borders - Subtle dark */
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 14 100% 57%;
+    
+    /* Modern shadows for dark mode */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
   }
 }
 
@@ -98,9 +121,44 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "liga" 1, "calt" 1;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    @apply font-heading tracking-tight;
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  button, a, [role="button"] {
+    @apply transition-all duration-200 ease-out;
+  }
+}
+
+@layer utilities {
+  /* Modern shadow utilities */
+  .shadow-modern-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .shadow-modern-md {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-modern-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .shadow-modern-xl {
+    box-shadow: var(--shadow-xl);
+  }
+  
+  /* Text gradients */
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600;
+  }
+  
+  /* Premium hover effects */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
   }
 }

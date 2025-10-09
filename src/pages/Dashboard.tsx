@@ -120,64 +120,64 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <Navbar />
       <main className="container mx-auto px-4 py-8 pt-20">
-        <div className="mb-8">
-          <h1 className="text-3xl font-heading font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-10">
+          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-2 tracking-tight">DASHBOARD</h1>
+          <p className="text-lg text-muted-foreground font-medium">
             Manage your lost and found reports
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/report-lost')}>
+        <div className="grid gap-6 md:grid-cols-3 mb-10">
+          <Card className="hover:shadow-modern-xl hover-lift transition-all cursor-pointer border-2" onClick={() => navigate('/report-lost')}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-primary" />
-                Report Lost Item
+              <CardTitle className="flex items-center gap-2 text-xl font-heading tracking-tight">
+                <Plus className="h-6 w-6 text-primary" />
+                REPORT LOST
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-medium">
                 Report an item you've lost
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Report Lost</Button>
+              <Button className="w-full font-bold shadow-modern-md">Report Lost</Button>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/report-found')}>
+          <Card className="hover:shadow-modern-xl hover-lift transition-all cursor-pointer border-2" onClick={() => navigate('/report-found')}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-success" />
-                Report Found Item
+              <CardTitle className="flex items-center gap-2 text-xl font-heading tracking-tight">
+                <Package className="h-6 w-6 text-success" />
+                REPORT FOUND
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-medium">
                 Report an item you've found
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="outline">Report Found</Button>
+              <Button className="w-full font-bold shadow-modern-md" variant="outline">Report Found</Button>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/search')}>
+          <Card className="hover:shadow-modern-xl hover-lift transition-all cursor-pointer border-2" onClick={() => navigate('/search')}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-accent-foreground" />
-                Search Items
+              <CardTitle className="flex items-center gap-2 text-xl font-heading tracking-tight">
+                <Search className="h-6 w-6 text-accent-foreground" />
+                SEARCH ITEMS
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="font-medium">
                 Find lost or found items
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" variant="secondary">Search</Button>
+              <Button className="w-full font-bold shadow-modern-md" variant="secondary">Search</Button>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
+        <Card className="border-2 shadow-modern-lg">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your recent reports and claims</CardDescription>
+            <CardTitle className="text-2xl font-heading tracking-tight">RECENT ACTIVITY</CardTitle>
+            <CardDescription className="font-medium">Your recent reports and claims</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingActivity ? (
@@ -190,19 +190,19 @@ const Dashboard = () => {
               <div className="space-y-6">
                 {recentItems.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-3 text-sm text-muted-foreground">Recent Reports</h3>
+                    <h3 className="font-bold mb-3 text-sm text-muted-foreground uppercase tracking-wide">Recent Reports</h3>
                     <div className="space-y-3">
                       {recentItems.map((item) => (
-                        <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                        <div key={item.id} className="flex items-start gap-3 p-4 rounded-lg border-2 bg-card hover:bg-accent/50 hover-lift transition-all shadow-modern-sm">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant={item.type === 'lost' ? 'destructive' : 'default'}>
-                                {item.type === 'lost' ? 'Lost' : 'Found'}
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant={item.type === 'lost' ? 'destructive' : 'default'} className="font-bold">
+                                {item.type === 'lost' ? 'LOST' : 'FOUND'}
                               </Badge>
-                              <h4 className="font-semibold truncate">{item.name}</h4>
+                              <h4 className="font-bold truncate">{item.name}</h4>
                             </div>
-                            <p className="text-sm text-muted-foreground line-clamp-1">{item.description}</p>
-                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <p className="text-sm text-muted-foreground line-clamp-1 font-medium">{item.description}</p>
+                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-medium">
                               <span className="flex items-center gap-1">
                                 <MapPin className="h-3 w-3" />
                                 {item.location}
@@ -221,14 +221,14 @@ const Dashboard = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Item</AlertDialogTitle>
-                                <AlertDialogDescription>
+                                <AlertDialogTitle className="font-heading text-xl">Delete Item</AlertDialogTitle>
+                                <AlertDialogDescription className="font-medium">
                                   Are you sure you want to delete "{item.name}"? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                <AlertDialogCancel className="font-bold">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold">
                                   Delete
                                 </AlertDialogAction>
                               </AlertDialogFooter>
@@ -242,25 +242,25 @@ const Dashboard = () => {
                 
                 {recentClaims.length > 0 && (
                   <div>
-                    <h3 className="font-semibold mb-3 text-sm text-muted-foreground">Recent Claims</h3>
+                    <h3 className="font-bold mb-3 text-sm text-muted-foreground uppercase tracking-wide">Recent Claims</h3>
                     <div className="space-y-3">
                       {recentClaims.map((claim) => (
-                        <div key={claim.id} className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                        <div key={claim.id} className="flex items-start gap-3 p-4 rounded-lg border-2 bg-card hover:bg-accent/50 hover-lift transition-all shadow-modern-sm">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-2">
                               <Badge variant={
                                 claim.status === 'approved' ? 'default' : 
                                 claim.status === 'rejected' ? 'destructive' : 
                                 'secondary'
-                              }>
+                              } className="font-bold uppercase">
                                 {claim.status}
                               </Badge>
-                              <h4 className="font-semibold truncate">{claim.items?.name || 'Item'}</h4>
+                              <h4 className="font-bold truncate">{claim.items?.name || 'Item'}</h4>
                             </div>
                             {claim.notes && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">{claim.notes}</p>
+                              <p className="text-sm text-muted-foreground line-clamp-1 font-medium">{claim.notes}</p>
                             )}
-                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-medium">
                               <span className="flex items-center gap-1">
                                 <MapPin className="h-3 w-3" />
                                 {claim.items?.location || 'Unknown'}

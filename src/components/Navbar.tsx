@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { ThemeToggle } from './ThemeToggle';
+import logo from '@/assets/logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2">
-            <Search className="h-6 w-6 text-primary" />
+            <img src={logo} alt="Lost & Found Logo" className="h-8 w-8 object-contain" />
             <span className="text-xl font-heading font-bold">Lost & Found</span>
           </Link>
 

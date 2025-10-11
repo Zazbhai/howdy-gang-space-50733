@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search as SearchIcon, MapPin, Calendar } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Calendar, Phone } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -161,6 +161,15 @@ const Search = () => {
                           <Badge variant="outline" className="mt-2">
                             {item.category}
                           </Badge>
+                          {item.phone_number && (
+                            <a
+                              href={`tel:${item.phone_number}`}
+                              className="flex items-center gap-2 text-primary hover:underline mt-3"
+                            >
+                              <Phone className="h-4 w-4" />
+                              <span>Contact Owner: {item.phone_number}</span>
+                            </a>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -210,6 +219,15 @@ const Search = () => {
                           <Badge variant="outline" className="mt-2">
                             {item.category}
                           </Badge>
+                          {item.phone_number && (
+                            <a
+                              href={`tel:${item.phone_number}`}
+                              className="flex items-center gap-2 text-primary hover:underline mt-3"
+                            >
+                              <Phone className="h-4 w-4" />
+                              <span>Contact Owner: {item.phone_number}</span>
+                            </a>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

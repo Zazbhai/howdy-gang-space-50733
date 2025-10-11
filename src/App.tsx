@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import ReportLost from "./pages/ReportLost";
 import ReportFound from "./pages/ReportFound";
 import Search from "./pages/Search";
+import SmartTags from "./pages/SmartTags";
+import ItemView from "./pages/ItemView";
 import NotFound from "./pages/NotFound";
 import MobileBottomNav from "./components/MobileBottomNav";
 
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/report-lost" element={<ReportLost />} />
             <Route path="/report-found" element={<ReportFound />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/smart-tags" element={<SmartTags />} />
+            <Route path="/:itemId" element={<ItemView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

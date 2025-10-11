@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Search, Plus, Package } from 'lucide-react';
+import { Home, Search, Plus, Package, Tag } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -13,6 +13,7 @@ const MobileBottomNav = () => {
   const navItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: Search, label: 'Search', path: '/search' },
+    { icon: Tag, label: 'Tags', path: '/smart-tags' },
     { icon: Plus, label: 'Lost', path: '/report-lost' },
     { icon: Package, label: 'Found', path: '/report-found' },
   ];

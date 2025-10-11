@@ -63,6 +63,7 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          is_smart_tag: boolean | null
           location: string
           name: string
           phone_number: string | null
@@ -78,6 +79,7 @@ export type Database = {
           description: string
           id?: string
           image_url?: string | null
+          is_smart_tag?: boolean | null
           location: string
           name: string
           phone_number?: string | null
@@ -93,6 +95,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          is_smart_tag?: boolean | null
           location?: string
           name?: string
           phone_number?: string | null

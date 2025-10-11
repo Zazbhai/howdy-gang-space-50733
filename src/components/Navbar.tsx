@@ -49,6 +49,9 @@ const Navbar = () => {
                   <Search className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Search</span>
                 </Button>
+                <Button variant="ghost" onClick={() => navigate('/smart-tags')} size="sm">
+                  <span className="hidden md:inline">Smart Tags</span>
+                </Button>
                 <Button variant="ghost" onClick={handleLogout} size="sm">
                   <LogOut className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Logout</span>

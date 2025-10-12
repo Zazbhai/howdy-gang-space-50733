@@ -20,6 +20,9 @@ interface ItemData {
   is_smart_tag: boolean;
   user_id: string;
   created_at: string;
+  owner_name: string | null;
+  estimated_value: number | null;
+  reward_amount: number | null;
 }
 
 interface OwnerProfile {
@@ -194,6 +197,13 @@ const ItemView = () => {
                 <Badge variant="outline">{item.category}</Badge>
               </div>
 
+              {isOwner && item.estimated_value && (
+                <div>
+                  <h3 className="font-semibold mb-2">Estimated Value</h3>
+                  <p className="text-lg font-medium">${item.estimated_value}</p>
+                </div>
+              )}
+
               {isLost ? (
                 <div className="space-y-4">
                   <Alert variant="destructive">
@@ -203,13 +213,22 @@ const ItemView = () => {
                     </AlertDescription>
                   </Alert>
 
+                  {item.reward_amount && (
+                    <Alert className="bg-primary/10 border-primary">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription className="font-semibold text-lg">
+                        💰 Reward Offered: ${item.reward_amount}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="bg-muted p-4 rounded-lg space-y-3">
                     <h3 className="font-semibold text-lg mb-3">Owner Contact Information</h3>
                     
-                    {ownerProfile && (
+                    {(item.owner_name || ownerProfile) && (
                       <div className="flex items-center gap-2">
                         <span className="font-medium">Name:</span>
-                        <span>{ownerProfile.name}</span>
+                        <span>{item.owner_name || ownerProfile?.name}</span>
                       </div>
                     )}
 
@@ -226,9 +245,17 @@ const ItemView = () => {
                       </div>
                     )}
 
-                    <p className="text-sm text-muted-foreground mt-4">
-                      Please contact the owner to return this item. They will be very grateful!
-                    </p>
+                    {!item.phone_number && (
+                      <p className="text-sm text-muted-foreground">
+                        Contact information will be visible once the owner marks this item as lost.
+                      </p>
+                    )}
+
+                    {item.phone_number && (
+                      <p className="text-sm text-muted-foreground mt-4">
+                        Please contact the owner to return this item. They will be very grateful!
+                      </p>
+                    )}
                   </div>
 
                   {!isOwner && (

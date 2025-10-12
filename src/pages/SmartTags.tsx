@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { QRCodeSVG } from 'qrcode.react';
 import { Plus, Download, AlertCircle, CheckCircle } from 'lucide-react';
@@ -22,6 +23,9 @@ interface SmartTag {
   phone_number: string | null;
   status: string;
   created_at: string;
+  owner_name: string | null;
+  estimated_value: number | null;
+  reward_amount: number | null;
 }
 
 const SmartTags = () => {
@@ -35,7 +39,12 @@ const SmartTags = () => {
     description: '',
     category: 'personal',
     phone_number: '',
+    owner_name: '',
+    estimated_value: '',
   });
+  const [showRewardDialog, setShowRewardDialog] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<SmartTag | null>(null);
+  const [rewardAmount, setRewardAmount] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -82,6 +91,8 @@ const SmartTags = () => {
         description: formData.description,
         category: formData.category as any,
         phone_number: formData.phone_number || null,
+        owner_name: formData.owner_name || null,
+        estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
         is_smart_tag: true,
         status: 'registered',
         type: 'lost',
@@ -96,7 +107,7 @@ const SmartTags = () => {
         description: 'Smart tag created successfully',
       });
 
-      setFormData({ name: '', description: '', category: 'personal', phone_number: '' });
+      setFormData({ name: '', description: '', category: 'personal', phone_number: '', owner_name: '', estimated_value: '' });
       setShowForm(false);
       fetchSmartTags();
     } catch (error) {
@@ -134,20 +145,68 @@ const SmartTags = () => {
   };
 
   const toggleLostStatus = async (tag: SmartTag) => {
+    if (tag.status === 'registered') {
+      // Marking as lost - require phone number
+      if (!tag.phone_number) {
+        toast({
+          title: 'Phone Number Required',
+          description: 'Please add a contact number before marking as lost',
+          variant: 'destructive',
+        });
+        return;
+      }
+      // Show reward dialog
+      setSelectedTag(tag);
+      setShowRewardDialog(true);
+    } else {
+      // Marking as safe
+      try {
+        const { error } = await supabase
+          .from('items')
+          .update({ status: 'registered', reward_amount: null })
+          .eq('id', tag.id);
+
+        if (error) throw error;
+
+        toast({
+          title: 'Success',
+          description: 'Item marked as safe',
+        });
+
+        fetchSmartTags();
+      } catch (error) {
+        console.error('Error updating status:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update status',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const handleMarkAsLost = async () => {
+    if (!selectedTag) return;
+
     try {
-      const newStatus = tag.status === 'registered' ? 'active' : 'registered';
       const { error } = await supabase
         .from('items')
-        .update({ status: newStatus })
-        .eq('id', tag.id);
+        .update({ 
+          status: 'active',
+          reward_amount: rewardAmount ? parseFloat(rewardAmount) : null
+        })
+        .eq('id', selectedTag.id);
 
       if (error) throw error;
 
       toast({
         title: 'Success',
-        description: `Item marked as ${newStatus === 'active' ? 'lost' : 'safe'}`,
+        description: 'Item marked as lost',
       });
 
+      setShowRewardDialog(false);
+      setSelectedTag(null);
+      setRewardAmount('');
       fetchSmartTags();
     } catch (error) {
       console.error('Error updating status:', error);
@@ -242,7 +301,29 @@ const SmartTags = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="phone_number">Contact Number (Optional)</Label>
+                    <Label htmlFor="owner_name">Owner Name</Label>
+                    <Input
+                      id="owner_name"
+                      value={formData.owner_name}
+                      onChange={(e) => setFormData({ ...formData, owner_name: e.target.value })}
+                      placeholder="Your name"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="estimated_value">Estimated Value ($)</Label>
+                    <Input
+                      id="estimated_value"
+                      type="number"
+                      step="0.01"
+                      value={formData.estimated_value}
+                      onChange={(e) => setFormData({ ...formData, estimated_value: e.target.value })}
+                      placeholder="e.g., 500.00"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone_number">Contact Number</Label>
                     <Input
                       id="phone_number"
                       type="tel"
@@ -294,43 +375,66 @@ const SmartTags = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col items-center gap-4">
-                      <div className="bg-white p-4 rounded-lg">
+                      <div className="bg-white p-4 rounded-lg animate-scale-in hover-scale">
                         <QRCodeSVG
                           id={`qr-${tag.id}`}
-                          value={`${currentUrl}/${tag.id}`}
+                          value={`${currentUrl}/item/${tag.id}`}
                           size={200}
                           level="H"
                           includeMargin
                         />
                       </div>
-                      <div className="text-xs text-center text-muted-foreground break-all">
-                        {currentUrl}/{tag.id}
+                      
+                      <div className="w-full space-y-2 text-sm">
+                        {tag.owner_name && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Owner:</span>
+                            <span className="font-medium">{tag.owner_name}</span>
+                          </div>
+                        )}
+                        {tag.estimated_value && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Value:</span>
+                            <span className="font-medium">${tag.estimated_value}</span>
+                          </div>
+                        )}
+                        {tag.status === 'active' && tag.reward_amount && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Reward:</span>
+                            <span className="font-semibold text-primary">${tag.reward_amount}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex gap-2 w-full">
+
+                      <div className="text-xs text-center text-muted-foreground break-all">
+                        {currentUrl}/item/{tag.id}
+                      </div>
+                      
+                      <div className="flex flex-col gap-2 w-full">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => downloadQRCode(tag.id, tag.name)}
-                          className="flex-1"
+                          className="w-full"
                         >
                           <Download className="mr-2 h-4 w-4" />
-                          Download QR
+                          Download QR Code
                         </Button>
                         <Button
                           variant={tag.status === 'active' ? 'default' : 'destructive'}
                           size="sm"
                           onClick={() => toggleLostStatus(tag)}
-                          className="flex-1"
+                          className="w-full"
                         >
                           {tag.status === 'active' ? (
                             <>
                               <CheckCircle className="mr-2 h-4 w-4" />
-                              Mark Safe
+                              Mark as Safe
                             </>
                           ) : (
                             <>
                               <AlertCircle className="mr-2 h-4 w-4" />
-                              Mark Lost
+                              Mark as Lost
                             </>
                           )}
                         </Button>
@@ -343,6 +447,38 @@ const SmartTags = () => {
           )}
         </div>
       </div>
+
+      <Dialog open={showRewardDialog} onOpenChange={setShowRewardDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark Item as Lost</DialogTitle>
+            <DialogDescription>
+              Optionally offer a reward for the return of your item
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="reward">Reward Amount ($)</Label>
+              <Input
+                id="reward"
+                type="number"
+                step="0.01"
+                value={rewardAmount}
+                onChange={(e) => setRewardAmount(e.target.value)}
+                placeholder="Optional reward amount"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRewardDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleMarkAsLost}>
+              Mark as Lost
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

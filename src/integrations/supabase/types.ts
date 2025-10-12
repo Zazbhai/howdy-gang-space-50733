@@ -14,168 +14,16 @@ export type Database = {
   }
   public: {
     Tables: {
-      claims: {
-        Row: {
-          claim_code: string
-          claimant_id: string
-          created_at: string
-          id: string
-          item_id: string
-          notes: string | null
-          status: Database["public"]["Enums"]["claim_status"]
-          updated_at: string
-        }
-        Insert: {
-          claim_code: string
-          claimant_id: string
-          created_at?: string
-          id?: string
-          item_id: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["claim_status"]
-          updated_at?: string
-        }
-        Update: {
-          claim_code?: string
-          claimant_id?: string
-          created_at?: string
-          id?: string
-          item_id?: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["claim_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "claims_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      items: {
-        Row: {
-          category: Database["public"]["Enums"]["item_category"]
-          created_at: string
-          date: string
-          description: string
-          id: string
-          image_url: string | null
-          is_smart_tag: boolean | null
-          location: string
-          name: string
-          phone_number: string | null
-          status: string
-          type: Database["public"]["Enums"]["item_type"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category: Database["public"]["Enums"]["item_category"]
-          created_at?: string
-          date: string
-          description: string
-          id?: string
-          image_url?: string | null
-          is_smart_tag?: boolean | null
-          location: string
-          name: string
-          phone_number?: string | null
-          status?: string
-          type: Database["public"]["Enums"]["item_type"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["item_category"]
-          created_at?: string
-          date?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          is_smart_tag?: boolean | null
-          location?: string
-          name?: string
-          phone_number?: string | null
-          status?: string
-          type?: Database["public"]["Enums"]["item_type"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "user"
-      claim_status: "pending" | "approved" | "rejected"
-      item_category:
-        | "wallet"
-        | "bag"
-        | "phone"
-        | "keys"
-        | "id"
-        | "jewelry"
-        | "electronics"
-        | "clothing"
-        | "documents"
-        | "other"
-      item_type: "lost" | "found"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -302,22 +150,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "user"],
-      claim_status: ["pending", "approved", "rejected"],
-      item_category: [
-        "wallet",
-        "bag",
-        "phone",
-        "keys",
-        "id",
-        "jewelry",
-        "electronics",
-        "clothing",
-        "documents",
-        "other",
-      ],
-      item_type: ["lost", "found"],
-    },
+    Enums: {},
   },
 } as const

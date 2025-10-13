@@ -432,7 +432,7 @@ const SmartTags = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="estimated_value">Estimated Value ($)</Label>
+                    <Label htmlFor="estimated_value">Estimated Value (₹)</Label>
                     <Input
                       id="estimated_value"
                       type="number"
@@ -519,13 +519,13 @@ const SmartTags = () => {
                         {tag.estimated_value && (
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Value:</span>
-                            <span className="font-medium">${tag.estimated_value}</span>
+                            <span className="font-medium">₹{tag.estimated_value}</span>
                           </div>
                         )}
                         {tag.status === 'active' && tag.reward_amount && (
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Reward:</span>
-                            <span className="font-semibold text-primary">${tag.reward_amount}</span>
+                            <span className="font-semibold text-primary">₹{tag.reward_amount}</span>
                           </div>
                         )}
                       </div>
@@ -634,7 +634,7 @@ const SmartTags = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="reward">Reward Amount ($)</Label>
+              <Label htmlFor="reward">Reward Amount (₹)</Label>
               <Input
                 id="reward"
                 type="number"
@@ -716,7 +716,7 @@ const SmartTags = () => {
             </div>
 
             <div>
-              <Label htmlFor="edit-estimated-value">Estimated Value ($)</Label>
+              <Label htmlFor="edit-estimated-value">Estimated Value (₹)</Label>
               <Input
                 id="edit-estimated-value"
                 type="number"

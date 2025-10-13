@@ -200,7 +200,7 @@ const ItemView = () => {
               {isOwner && item.estimated_value && (
                 <div>
                   <h3 className="font-semibold mb-2">Estimated Value</h3>
-                  <p className="text-lg font-medium">${item.estimated_value}</p>
+                  <p className="text-lg font-medium">₹{item.estimated_value}</p>
                 </div>
               )}
 
@@ -217,7 +217,7 @@ const ItemView = () => {
                     <Alert className="bg-primary/10 border-primary">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription className="font-semibold text-lg">
-                        💰 Reward Offered: ${item.reward_amount}
+                        💰 Reward Offered: ₹{item.reward_amount}
                       </AlertDescription>
                     </Alert>
                   )}

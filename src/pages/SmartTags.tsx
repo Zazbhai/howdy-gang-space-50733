@@ -234,7 +234,7 @@ const SmartTags = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -375,14 +375,17 @@ const SmartTags = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col items-center gap-4">
-                      <div className="bg-white p-4 rounded-lg animate-scale-in hover-scale">
-                        <QRCodeSVG
-                          id={`qr-${tag.id}`}
-                          value={`${currentUrl}/item/${tag.id}`}
-                          size={200}
-                          level="H"
-                          includeMargin
-                        />
+                      <div className="relative group bg-white p-4 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 animate-fade-in">
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-orange-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
+                        <div className="relative">
+                          <QRCodeSVG
+                            id={`qr-${tag.id}`}
+                            value={`${currentUrl}/item/${tag.id}`}
+                            size={200}
+                            level="H"
+                            includeMargin
+                          />
+                        </div>
                       </div>
                       
                       <div className="w-full space-y-2 text-sm">

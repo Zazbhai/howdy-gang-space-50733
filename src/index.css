@@ -161,4 +161,9 @@ All colors MUST be HSL.
   .hover-lift {
     @apply transition-transform duration-200 hover:-translate-y-1;
   }
+  
+  /* Safe area insets for mobile devices with notches */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

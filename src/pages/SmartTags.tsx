@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Download, AlertCircle, CheckCircle, Pencil, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { Badge } from '@/components/ui/badge';
 
@@ -45,6 +45,17 @@ const SmartTags = () => {
   const [showRewardDialog, setShowRewardDialog] = useState(false);
   const [selectedTag, setSelectedTag] = useState<SmartTag | null>(null);
   const [rewardAmount, setRewardAmount] = useState('');
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    category: 'personal',
+    phone_number: '',
+    owner_name: '',
+    estimated_value: '',
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -146,13 +157,12 @@ const SmartTags = () => {
 
   const toggleLostStatus = async (tag: SmartTag) => {
     if (tag.status === 'registered') {
-      // Marking as lost - require phone number
+      // Marking as lost - check if phone number exists
       if (!tag.phone_number) {
-        toast({
-          title: 'Phone Number Required',
-          description: 'Please add a contact number before marking as lost',
-          variant: 'destructive',
-        });
+        // Show phone dialog first
+        setSelectedTag(tag);
+        setPhoneNumber('');
+        setShowPhoneDialog(true);
         return;
       }
       // Show reward dialog
@@ -185,6 +195,39 @@ const SmartTags = () => {
     }
   };
 
+  const handleAddPhoneAndMarkLost = async () => {
+    if (!selectedTag || !phoneNumber) {
+      toast({
+        title: 'Phone Number Required',
+        description: 'Please provide a contact number',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Update phone number first
+      const { error } = await supabase
+        .from('items')
+        .update({ phone_number: phoneNumber })
+        .eq('id', selectedTag.id);
+
+      if (error) throw error;
+
+      // Close phone dialog and open reward dialog
+      setShowPhoneDialog(false);
+      setShowRewardDialog(true);
+      fetchSmartTags();
+    } catch (error) {
+      console.error('Error updating phone:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update phone number',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleMarkAsLost = async () => {
     if (!selectedTag) return;
 
@@ -213,6 +256,84 @@ const SmartTags = () => {
       toast({
         title: 'Error',
         description: 'Failed to update status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleEditTag = (tag: SmartTag) => {
+    setSelectedTag(tag);
+    setEditFormData({
+      name: tag.name,
+      description: tag.description,
+      category: tag.category,
+      phone_number: tag.phone_number || '',
+      owner_name: tag.owner_name || '',
+      estimated_value: tag.estimated_value?.toString() || '',
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleUpdateTag = async () => {
+    if (!selectedTag) return;
+
+    try {
+      const { error } = await supabase
+        .from('items')
+        .update({
+          name: editFormData.name,
+          description: editFormData.description,
+          category: editFormData.category as any,
+          phone_number: editFormData.phone_number || null,
+          owner_name: editFormData.owner_name || null,
+          estimated_value: editFormData.estimated_value ? parseFloat(editFormData.estimated_value) : null,
+        })
+        .eq('id', selectedTag.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Smart tag updated successfully',
+      });
+
+      setShowEditDialog(false);
+      setSelectedTag(null);
+      fetchSmartTags();
+    } catch (error) {
+      console.error('Error updating tag:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update smart tag',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    if (!confirm('Are you sure you want to delete this smart tag? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', tagId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Smart tag deleted successfully',
+      });
+
+      fetchSmartTags();
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete smart tag',
         variant: 'destructive',
       });
     }
@@ -413,6 +534,27 @@ const SmartTags = () => {
                         {currentUrl}/item/{tag.id}
                       </div>
                       
+                      <div className="flex gap-2 w-full">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditTag(tag)}
+                          className="flex-1"
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteTag(tag.id)}
+                          className="flex-1 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </Button>
+                      </div>
+                      
                       <div className="flex flex-col gap-2 w-full">
                         <Button
                           variant="outline"
@@ -451,6 +593,37 @@ const SmartTags = () => {
         </div>
       </div>
 
+      <Dialog open={showPhoneDialog} onOpenChange={setShowPhoneDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Contact Number Required</DialogTitle>
+            <DialogDescription>
+              Please provide a contact number so people can reach you if they find your item
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="phone">Contact Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Your contact number"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPhoneDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPhoneAndMarkLost}>
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showRewardDialog} onOpenChange={setShowRewardDialog}>
         <DialogContent>
           <DialogHeader>
@@ -478,6 +651,99 @@ const SmartTags = () => {
             </Button>
             <Button onClick={handleMarkAsLost}>
               Mark as Lost
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Smart Tag</DialogTitle>
+            <DialogDescription>
+              Update the details of your smart tag
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Item Name *</Label>
+              <Input
+                id="edit-name"
+                value={editFormData.name}
+                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                placeholder="e.g., Wallet, Phone"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editFormData.description}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                placeholder="Describe your item"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-category">Category</Label>
+              <Select
+                value={editFormData.category}
+                onValueChange={(value) => setEditFormData({ ...editFormData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="personal">Personal</SelectItem>
+                  <SelectItem value="electronics">Electronics</SelectItem>
+                  <SelectItem value="documents">Documents</SelectItem>
+                  <SelectItem value="accessories">Accessories</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-owner-name">Owner Name</Label>
+              <Input
+                id="edit-owner-name"
+                value={editFormData.owner_name}
+                onChange={(e) => setEditFormData({ ...editFormData, owner_name: e.target.value })}
+                placeholder="Your name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-estimated-value">Estimated Value ($)</Label>
+              <Input
+                id="edit-estimated-value"
+                type="number"
+                step="0.01"
+                value={editFormData.estimated_value}
+                onChange={(e) => setEditFormData({ ...editFormData, estimated_value: e.target.value })}
+                placeholder="e.g., 500.00"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-phone">Contact Number</Label>
+              <Input
+                id="edit-phone"
+                type="tel"
+                value={editFormData.phone_number}
+                onChange={(e) => setEditFormData({ ...editFormData, phone_number: e.target.value })}
+                placeholder="Your contact number"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateTag}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

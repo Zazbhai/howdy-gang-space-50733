@@ -41,11 +41,12 @@ const Dashboard = () => {
       
       setLoadingActivity(true);
       
-      // Fetch recent items reported by the user
+      // Fetch recent items reported by the user (excluding smart tags)
       const { data: items, error: itemsError } = await supabase
         .from('items')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_smart_tag', false)
         .order('created_at', { ascending: false })
         .limit(5);
       

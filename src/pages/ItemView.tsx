@@ -51,9 +51,16 @@ const ItemView = () => {
         .select('*')
         .eq('id', itemId)
         .eq('is_smart_tag', true)
-        .single();
+        .maybeSingle();
 
       if (itemError) throw itemError;
+      
+      if (!itemData) {
+        setItem(null);
+        setLoading(false);
+        return;
+      }
+      
       setItem(itemData);
 
       // Fetch owner profile
@@ -61,7 +68,7 @@ const ItemView = () => {
         .from('profiles')
         .select('name')
         .eq('id', itemData.user_id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
       setOwnerProfile(profileData);

@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Package, MapPin, Calendar, Trash2 } from 'lucide-react';
+import { Plus, Search, Package, MapPin, Calendar, Trash2, Bell, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const { user, loading } = useAuth();
   const [recentItems, setRecentItems] = useState<any[]>([]);
   const [recentClaims, setRecentClaims] = useState<any[]>([]);
+  const [pendingClaims, setPendingClaims] = useState<any[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const { toast } = useToast();
 
@@ -76,6 +78,37 @@ const Dashboard = () => {
       } else {
         setRecentClaims(claims || []);
       }
+
+      // Fetch pending claims for user's items
+      const { data: userItems } = await supabase
+        .from('items')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (userItems && userItems.length > 0) {
+        const { data: pending, error: pendingError } = await supabase
+          .from('claims')
+          .select(`
+            *,
+            items (
+              id,
+              name,
+              category
+            ),
+            profiles!claims_claimant_id_fkey (
+              name
+            )
+          `)
+          .eq('status', 'pending')
+          .in('item_id', userItems.map(i => i.id))
+          .order('created_at', { ascending: false });
+
+        if (pendingError) {
+          console.error('Error fetching pending claims:', pendingError);
+        } else {
+          setPendingClaims(pending || []);
+        }
+      }
       
       setLoadingActivity(false);
     };
@@ -105,6 +138,30 @@ const Dashboard = () => {
     });
   };
 
+  const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
+    try {
+      const { error } = await supabase
+        .from('claims')
+        .update({ status: action })
+        .eq('id', claimId);
+
+      if (error) throw error;
+
+      setPendingClaims(prev => prev.filter(claim => claim.id !== claimId));
+      toast({
+        title: 'Success',
+        description: `Claim ${action === 'approved' ? 'approved' : 'rejected'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating claim:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update claim',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -127,6 +184,59 @@ const Dashboard = () => {
             Manage your lost and found reports
           </p>
         </div>
+
+        {pendingClaims.length > 0 && (
+          <Card className="border-2 shadow-modern-lg mb-6">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-primary" />
+                <CardTitle className="text-2xl font-heading tracking-tight">PENDING CLAIMS</CardTitle>
+              </div>
+              <CardDescription className="font-medium">
+                People who found your items are waiting for confirmation
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {pendingClaims.map((claim) => (
+                <Alert key={claim.id} className="bg-muted/50 border-2">
+                  <AlertDescription className="space-y-3">
+                    <div>
+                      <p className="font-bold text-base">{claim.items?.name}</p>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        Found by: {claim.profiles?.name || 'Anonymous'}
+                      </p>
+                      {claim.notes && (
+                        <p className="text-sm mt-1 font-medium">{claim.notes}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1 font-mono">
+                        Claim Code: {claim.claim_code}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleClaimAction(claim.id, 'approved')}
+                        className="flex-1 font-bold"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleClaimAction(claim.id, 'rejected')}
+                        className="flex-1 font-bold"
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-6 md:grid-cols-3 mb-10">
           <Card className="hover:shadow-modern-xl hover-lift transition-all cursor-pointer border-2" onClick={() => navigate('/report-lost')}>

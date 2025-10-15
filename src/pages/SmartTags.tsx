@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Download, AlertCircle, CheckCircle, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Download, AlertCircle, CheckCircle, Pencil, Trash2, Bell, XCircle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SmartTag {
   id: string;
@@ -34,6 +35,7 @@ const SmartTags = () => {
   const [tags, setTags] = useState<SmartTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [pendingClaims, setPendingClaims] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -66,6 +68,7 @@ const SmartTags = () => {
   useEffect(() => {
     if (user) {
       fetchSmartTags();
+      fetchPendingClaims();
     }
   }, [user]);
 
@@ -89,6 +92,40 @@ const SmartTags = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendingClaims = async () => {
+    try {
+      const { data: smartTagItems } = await supabase
+        .from('items')
+        .select('id')
+        .eq('user_id', user?.id)
+        .eq('is_smart_tag', true);
+
+      if (smartTagItems && smartTagItems.length > 0) {
+        const { data, error } = await supabase
+          .from('claims')
+          .select(`
+            *,
+            items (
+              id,
+              name,
+              category
+            ),
+            profiles!claims_claimant_id_fkey (
+              name
+            )
+          `)
+          .eq('status', 'pending')
+          .in('item_id', smartTagItems.map(i => i.id))
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setPendingClaims(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching pending claims:', error);
     }
   };
 
@@ -339,6 +376,30 @@ const SmartTags = () => {
     }
   };
 
+  const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
+    try {
+      const { error } = await supabase
+        .from('claims')
+        .update({ status: action })
+        .eq('id', claimId);
+
+      if (error) throw error;
+
+      setPendingClaims(prev => prev.filter(claim => claim.id !== claimId));
+      toast({
+        title: 'Success',
+        description: `Claim ${action === 'approved' ? 'approved' : 'rejected'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating claim:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update claim',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -461,6 +522,59 @@ const SmartTags = () => {
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {pendingClaims.length > 0 && (
+            <Card className="border-2 shadow-lg mb-8">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-2xl font-heading">PENDING CLAIMS</CardTitle>
+                </div>
+                <CardDescription>
+                  People who found your smart tag items are waiting for confirmation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {pendingClaims.map((claim) => (
+                  <Alert key={claim.id} className="bg-muted/50 border-2">
+                    <AlertDescription className="space-y-3">
+                      <div>
+                        <p className="font-bold text-base">{claim.items?.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Found by: {claim.profiles?.name || 'Anonymous'}
+                        </p>
+                        {claim.notes && (
+                          <p className="text-sm mt-1">{claim.notes}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1 font-mono">
+                          Claim Code: {claim.claim_code}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleClaimAction(claim.id, 'approved')}
+                          className="flex-1"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleClaimAction(claim.id, 'rejected')}
+                          className="flex-1"
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                ))}
               </CardContent>
             </Card>
           )}

@@ -79,7 +79,7 @@ const Dashboard = () => {
         setRecentClaims(claims || []);
       }
 
-      // Fetch pending claims for user's items
+      // Fetch pending claims for ALL user's items (including smart tags)
       const { data: userItems } = await supabase
         .from('items')
         .select('id')
@@ -93,7 +93,8 @@ const Dashboard = () => {
             items (
               id,
               name,
-              category
+              category,
+              is_smart_tag
             ),
             profiles!claims_claimant_id_fkey (
               name

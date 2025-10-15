@@ -112,9 +112,6 @@ const SmartTags = () => {
               id,
               name,
               category
-            ),
-            profiles!claims_claimant_id_fkey (
-              name
             )
           `)
           .eq('status', 'pending')
@@ -122,7 +119,25 @@ const SmartTags = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setPendingClaims(data || []);
+        
+        // Fetch claimant profiles separately
+        if (data && data.length > 0) {
+          const claimantIds = data.map(c => c.claimant_id);
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, name')
+            .in('id', claimantIds);
+
+          // Merge profile data with claims
+          const claimsWithProfiles = data.map(claim => ({
+            ...claim,
+            profiles: profiles?.find(p => p.id === claim.claimant_id) || null
+          }));
+          
+          setPendingClaims(claimsWithProfiles);
+        } else {
+          setPendingClaims([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching pending claims:', error);

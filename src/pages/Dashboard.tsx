@@ -153,17 +153,32 @@ const Dashboard = () => {
 
   const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
     try {
-      const { error } = await supabase
+      // Get the claim to find the item_id
+      const claim = pendingClaims.find(c => c.id === claimId);
+      if (!claim) return;
+
+      // Update claim status
+      const { error: claimError } = await supabase
         .from('claims')
         .update({ status: action })
         .eq('id', claimId);
 
-      if (error) throw error;
+      if (claimError) throw claimError;
 
-      setPendingClaims(prev => prev.filter(claim => claim.id !== claimId));
+      // If approved, mark the item as lost (active status)
+      if (action === 'approved') {
+        const { error: itemError } = await supabase
+          .from('items')
+          .update({ status: 'active' })
+          .eq('id', claim.item_id);
+
+        if (itemError) throw itemError;
+      }
+
+      setPendingClaims(prev => prev.filter(c => c.id !== claimId));
       toast({
         title: 'Success',
-        description: `Claim ${action === 'approved' ? 'approved' : 'rejected'} successfully`,
+        description: `Claim ${action === 'approved' ? 'approved' : 'rejected'} successfully${action === 'approved' ? '. Item marked as lost.' : ''}`,
       });
     } catch (error) {
       console.error('Error updating claim:', error);

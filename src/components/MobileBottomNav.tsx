@@ -2,13 +2,20 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Search, Plus, Package, Tag } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useButtonSound } from '@/hooks/useButtonSound';
 
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { playSound } = useButtonSound();
 
   if (!user) return null;
+
+  const handleNavigate = (path: string) => {
+    playSound();
+    navigate(path);
+  };
 
   const navItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
@@ -30,7 +37,7 @@ const MobileBottomNav = () => {
               key={item.path}
               variant="ghost"
               size="sm"
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               className={`flex-1 flex flex-col items-center gap-1 h-auto py-2.5 rounded-lg transition-all ${
                 isActive 
                   ? 'text-primary bg-primary/10' 

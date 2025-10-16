@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useButtonSound } from '@/hooks/useButtonSound';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [pendingClaims, setPendingClaims] = useState<any[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const { toast } = useToast();
+  const { playSound } = useButtonSound();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -162,6 +164,7 @@ const Dashboard = () => {
   };
 
   const handleDeleteItem = async (itemId: string) => {
+    playSound();
     const { error } = await supabase
       .from('items')
       .delete()
@@ -185,6 +188,7 @@ const Dashboard = () => {
   };
 
   const handleClearActivity = async () => {
+    playSound();
     if (!confirm('Are you sure you want to clear all recent activity? This will delete all your reported items.')) {
       return;
     }
@@ -217,6 +221,7 @@ const Dashboard = () => {
   };
 
   const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
+    playSound();
     try {
       // Get the claim to find the item_id
       const claim = pendingClaims.find(c => c.id === claimId);

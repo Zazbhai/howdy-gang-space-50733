@@ -1,0 +1,12 @@
+import { useCallback } from 'react';
+
+export const useButtonSound = () => {
+  const playSound = useCallback(() => {
+    // Soothing button click sound (soft beep)
+    const audio = new Audio('data:audio/wav;base64,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');
+    audio.volume = 0.2;
+    audio.play().catch(() => {});
+  }, []);
+
+  return { playSound };
+};

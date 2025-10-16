@@ -15,6 +15,7 @@ import { Plus, Download, AlertCircle, CheckCircle, Pencil, Trash2, Bell, XCircle
 import Navbar from '@/components/Navbar';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useButtonSound } from '@/hooks/useButtonSound';
 
 interface SmartTag {
   id: string;
@@ -36,6 +37,7 @@ const SmartTags = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [pendingClaims, setPendingClaims] = useState<any[]>([]);
+  const { playSound } = useButtonSound();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -166,6 +168,7 @@ const SmartTags = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    playSound();
     
     try {
       const { error } = await supabase.from('items').insert([{
@@ -204,6 +207,7 @@ const SmartTags = () => {
   };
 
   const downloadQRCode = (itemId: string, itemName: string) => {
+    playSound();
     const svg = document.getElementById(`qr-${itemId}`);
     if (!svg) return;
 
@@ -228,6 +232,7 @@ const SmartTags = () => {
   };
 
   const toggleLostStatus = async (tag: SmartTag) => {
+    playSound();
     if (tag.status === 'registered') {
       // Marking as lost - check if phone number exists
       if (!tag.phone_number) {
@@ -334,6 +339,7 @@ const SmartTags = () => {
   };
 
   const handleEditTag = (tag: SmartTag) => {
+    playSound();
     setSelectedTag(tag);
     setEditFormData({
       name: tag.name,
@@ -347,6 +353,7 @@ const SmartTags = () => {
   };
 
   const handleUpdateTag = async () => {
+    playSound();
     if (!selectedTag) return;
 
     try {
@@ -419,6 +426,7 @@ const SmartTags = () => {
   };
 
   const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
+    playSound();
     try {
       // Get the claim to find the item_id
       const claim = pendingClaims.find(c => c.id === claimId);

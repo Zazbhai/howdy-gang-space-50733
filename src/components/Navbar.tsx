@@ -6,12 +6,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { ThemeToggle } from './ThemeToggle';
 import logo from '@/assets/logo.png';
+import { useButtonSound } from '@/hooks/useButtonSound';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { playSound } = useButtonSound();
 
   const handleLogout = async () => {
+    playSound();
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
@@ -28,6 +31,11 @@ const Navbar = () => {
     }
   };
 
+  const handleNavigate = (path: string) => {
+    playSound();
+    navigate(path);
+  };
+
   return (
     <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -41,15 +49,15 @@ const Navbar = () => {
             <ThemeToggle />
             {user ? (
               <>
-                <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
+                <Button variant="ghost" onClick={() => handleNavigate('/dashboard')} size="sm">
                   <User className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Dashboard</span>
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/search')} size="sm">
+                <Button variant="ghost" onClick={() => handleNavigate('/search')} size="sm">
                   <Search className="h-4 w-4 md:mr-2" />
                   <span className="hidden md:inline">Search</span>
                 </Button>
-                <Button variant="ghost" onClick={() => navigate('/smart-tags')} size="sm">
+                <Button variant="ghost" onClick={() => handleNavigate('/smart-tags')} size="sm">
                   <span className="hidden md:inline">Smart Tags</span>
                 </Button>
                 <Button variant="ghost" onClick={handleLogout} size="sm">
@@ -58,7 +66,7 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <Button onClick={() => navigate('/auth')}>
+              <Button onClick={() => handleNavigate('/auth')}>
                 Sign In
               </Button>
             )}

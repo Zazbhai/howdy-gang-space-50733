@@ -79,14 +79,14 @@ const Dashboard = () => {
         setRecentClaims(claims || []);
       }
 
-      // Fetch pending claims for ALL user's items (including smart tags)
+      // Fetch ALL claims for user's items (pending, approved, rejected)
       const { data: userItems } = await supabase
         .from('items')
         .select('id')
         .eq('user_id', user.id);
 
       if (userItems && userItems.length > 0) {
-        const { data: pending, error: pendingError } = await supabase
+        const { data: allClaims, error: allClaimsError } = await supabase
           .from('claims')
           .select(`
             *,
@@ -97,27 +97,31 @@ const Dashboard = () => {
               is_smart_tag
             )
           `)
-          .eq('status', 'pending')
           .in('item_id', userItems.map(i => i.id))
           .order('created_at', { ascending: false });
 
-        if (pendingError) {
-          console.error('Error fetching pending claims:', pendingError);
-        } else if (pending && pending.length > 0) {
+        if (allClaimsError) {
+          console.error('Error fetching all claims:', allClaimsError);
+        } else if (allClaims && allClaims.length > 0) {
           // Fetch claimant profiles separately
-          const claimantIds = pending.map(c => c.claimant_id);
+          const claimantIds = allClaims.map(c => c.claimant_id);
           const { data: profiles } = await supabase
             .from('profiles')
             .select('id, name')
             .in('id', claimantIds);
 
           // Merge profile data with claims
-          const claimsWithProfiles = pending.map(claim => ({
+          const claimsWithProfiles = allClaims.map(claim => ({
             ...claim,
             profiles: profiles?.find(p => p.id === claim.claimant_id) || null
           }));
           
-          setPendingClaims(claimsWithProfiles);
+          // Separate pending claims
+          setPendingClaims(claimsWithProfiles.filter(c => c.status === 'pending'));
+          
+          // Add approved/rejected claims to recent claims
+          const ownerClaims = claimsWithProfiles.filter(c => c.status !== 'pending').slice(0, 5);
+          setRecentClaims(prev => [...prev, ...ownerClaims].slice(0, 10));
         } else {
           setPendingClaims([]);
         }
@@ -127,7 +131,35 @@ const Dashboard = () => {
     };
     
     fetchRecentActivity();
+
+    // Real-time subscription for claims updates
+    if (user) {
+      const channel = supabase
+        .channel('claims-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'claims'
+          },
+          () => {
+            fetchRecentActivity();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user]);
+
+  const playDeleteSound = () => {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSR4LTKXh8bllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rlhHAU+');
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+  };
 
   const handleDeleteItem = async (itemId: string) => {
     const { error } = await supabase
@@ -144,11 +176,44 @@ const Dashboard = () => {
       return;
     }
 
+    playDeleteSound();
     setRecentItems(prev => prev.filter(item => item.id !== itemId));
     toast({
       title: "Success",
       description: "Item deleted successfully.",
     });
+  };
+
+  const handleClearActivity = async () => {
+    if (!confirm('Are you sure you want to clear all recent activity? This will delete all your reported items.')) {
+      return;
+    }
+
+    try {
+      const itemIds = recentItems.map(item => item.id);
+      if (itemIds.length === 0) return;
+
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .in('id', itemIds);
+
+      if (error) throw error;
+
+      playDeleteSound();
+      setRecentItems([]);
+      toast({
+        title: "Success",
+        description: "Recent activity cleared successfully.",
+      });
+    } catch (error) {
+      console.error('Error clearing activity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear activity.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleClaimAction = async (claimId: string, action: 'approved' | 'rejected') => {
@@ -315,8 +380,22 @@ const Dashboard = () => {
 
         <Card className="border-2 shadow-modern-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-heading tracking-tight">RECENT ACTIVITY</CardTitle>
-            <CardDescription className="font-medium">Your recent reports and claims</CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-2xl font-heading tracking-tight">RECENT ACTIVITY</CardTitle>
+                <CardDescription className="font-medium">Your recent reports and claims</CardDescription>
+              </div>
+              {(recentItems.length > 0 || recentClaims.length > 0) && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleClearActivity}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Clear Activity
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {loadingActivity ? (
@@ -381,7 +460,7 @@ const Dashboard = () => {
                 
                 {recentClaims.length > 0 && (
                   <div>
-                    <h3 className="font-bold mb-3 text-sm text-muted-foreground uppercase tracking-wide">Recent Claims</h3>
+                    <h3 className="font-bold mb-3 text-sm text-muted-foreground uppercase tracking-wide">Claims Activity</h3>
                     <div className="space-y-3">
                       {recentClaims.map((claim) => (
                         <div key={claim.id} className="flex items-start gap-3 p-4 rounded-lg border-2 bg-card hover:bg-accent/50 hover-lift transition-all shadow-modern-sm">
@@ -395,9 +474,17 @@ const Dashboard = () => {
                                 {claim.status}
                               </Badge>
                               <h4 className="font-bold truncate">{claim.items?.name || 'Item'}</h4>
+                              {claim.items?.is_smart_tag && (
+                                <Badge variant="outline" className="text-xs">Smart Tag</Badge>
+                              )}
                             </div>
                             {claim.notes && (
                               <p className="text-sm text-muted-foreground line-clamp-1 font-medium">{claim.notes}</p>
+                            )}
+                            {claim.profiles && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {claim.claimant_id === user?.id ? 'Your claim' : `Claim by: ${claim.profiles.name}`}
+                              </p>
                             )}
                             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground font-medium">
                               <span className="flex items-center gap-1">

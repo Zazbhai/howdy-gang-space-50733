@@ -69,6 +69,26 @@ const SmartTags = () => {
     if (user) {
       fetchSmartTags();
       fetchPendingClaims();
+
+      // Real-time subscription for claims updates
+      const channel = supabase
+        .channel('smart-tag-claims')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'claims'
+          },
+          () => {
+            fetchPendingClaims();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
@@ -362,6 +382,12 @@ const SmartTags = () => {
     }
   };
 
+  const playDeleteSound = () => {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSR4LTKXh8bllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rllHAU+ltryy3cqBSp+zPLaizsIG2m98OihUBELTKzn8rlhHAU+');
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+  };
+
   const handleDeleteTag = async (tagId: string) => {
     if (!confirm('Are you sure you want to delete this smart tag? This action cannot be undone.')) {
       return;
@@ -375,6 +401,7 @@ const SmartTags = () => {
 
       if (error) throw error;
 
+      playDeleteSound();
       toast({
         title: 'Success',
         description: 'Smart tag deleted successfully',
@@ -640,18 +667,21 @@ const SmartTags = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="relative group bg-white p-4 rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 animate-fade-in">
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-orange-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-                        <div className="relative">
+                     <div className="flex flex-col items-center gap-4">
+                      <div className="relative group bg-white p-4 rounded-lg shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-110 animate-fade-in">
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-orange-500/30 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl animate-pulse"></div>
+                        <div className="absolute inset-0 rounded-lg border-2 border-primary/0 group-hover:border-primary/50 transition-all duration-500 animate-[spin_3s_linear_infinite]"></div>
+                        <div className="relative transform transition-transform duration-500 group-hover:rotate-2">
                           <QRCodeSVG
                             id={`qr-${tag.id}`}
                             value={`${currentUrl}/item/${tag.id}`}
                             size={200}
                             level="H"
                             includeMargin
+                            className="drop-shadow-2xl"
                           />
                         </div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-orange-500 rounded-lg opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
                       </div>
                       
                       <div className="w-full space-y-2 text-sm">
